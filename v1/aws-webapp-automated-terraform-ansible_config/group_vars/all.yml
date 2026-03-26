@@ -1,0 +1,3 @@
+# Configuring SSH connection behavior for all hosts in the Ansible inventory.
+ansible_ssh_common_args: >
+  -o ProxyCommand="ssh -i ~/secrets/private-key.pem -W %h:%p ubuntu@bastion_host_ip"

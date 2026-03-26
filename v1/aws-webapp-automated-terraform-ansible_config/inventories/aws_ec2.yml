@@ -1,0 +1,11 @@
+plugin: amazon.aws.aws_ec2
+regions:
+  - ap-south-1
+filters:
+  "tag:Name": "web_asg_instance"
+  # instance-state-name: running
+keyed_groups:
+  - key: tags.Name
+    prefix: tag_Name_
+compose:
+  ansible_host: private_ip_address

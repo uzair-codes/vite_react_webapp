@@ -1,0 +1,9 @@
+---
+
+- name: Deploy Portfolio
+  hosts: role_Webservers
+  become: true
+
+  roles:
+    - nginx
+    - deploy_portfolio

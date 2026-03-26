@@ -1,0 +1,16 @@
+# ansible_ssh_private_key_file: ~/devops/id_rsa
+
+
+bastion_host: "{{ groups['role_Bastion_Host'][0] }}"
+bastion_ip: "{{ hostvars[bastion_host]['ansible_host'] }}"
+
+ansible_ssh_common_args: >
+  -o ProxyCommand="ssh -i ~/devops/id_rsa -W %h:%p ubuntu@{{ bastion_ip }}"
+
+# Internally Ansible runs a command like
+# ssh [options] ubuntu@target_ip
+# ssh -o ProxyCommand="ssh -i /ssh-pvt-key -W %h:%p ubuntu@bastion_ip" ubuntu@private_instance_ip
+
+# you can use the same command from your terminal to directly jump into private hosts
+# or a simpler command is 
+# ssh -J ubuntu@bastion_ip ubuntu@private_instance_ip

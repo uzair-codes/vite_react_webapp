@@ -1,0 +1,150 @@
+---
+- name: Update APT cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  become: yes
+
+- name: Upgrade packages
+  apt:
+    upgrade: dist
+    force_apt_get: yes
+  become: yes
+
+- name: Install base packages (excluding nodejs/npm)
+  apt:
+    name:
+      - curl
+      - git
+      - build-essential
+      - ca-certificates
+      - nginx
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Ensure required transport and certificates for HTTPS repos
+  apt:
+    name:
+      - apt-transport-https
+      - gnupg
+      - software-properties-common
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Run NodeSource setup script for Node.js 20.x
+  shell: curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+  become: yes
+
+- name: Install Node.js (includes npm)
+  apt:
+    name: nodejs
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Verify Node.js and npm versions
+  command: "{{ item }} --version"
+  loop:
+    - node
+    - npm
+  register: node_version
+  changed_when: false
+  become: yes
+
+- name: Enable and start Nginx
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+  become: yes
+
+- name: Clone portfolio repo
+  git:
+    repo: "https://github.com/uzair-codes/personal-portfolio.git"
+    dest: /opt/personal-portfolio
+    version: master
+    force: yes
+
+# Create a 1G swap file if it does not already exist
+- name: Create swap file
+  command: fallocate -l 1G /swapfile
+  args:
+    creates: /swapfile
+  become: yes
+
+# Set correct permissions on swap file
+- name: Set correct permissions on swapfile
+  file:
+    path: /swapfile
+    mode: '0600'
+  become: yes
+
+# Check if swap is already enabled
+- name: Check if swap is already enabled
+  command: swapon --show
+  register: swap_status
+  changed_when: false
+  become: yes
+
+# Initialize swap area only if no swap is active
+- name: Initialize swap area
+  command: mkswap /swapfile
+  when: swap_status.stdout == ""
+  become: yes
+
+# Enable swapfile only if no swap is active
+- name: Enable swapfile
+  command: swapon /swapfile
+  when: swap_status.stdout == ""
+  become: yes
+
+# Persist swap in fstab so it survives reboot
+- name: Persist swap in fstab
+  lineinfile:
+    path: /etc/fstab
+    line: '/swapfile none swap sw 0 0'
+    state: present
+  become: yes
+
+- name: Install npm dependencies
+  command: npm ci
+  args:
+    chdir: /opt/personal-portfolio
+
+- name: Build React app
+  command: npm run build
+  args:
+    chdir: /opt/personal-portfolio
+
+- name: Deploy build to nginx webroot
+  copy:
+    src: /opt/personal-portfolio/build/
+    dest: /var/www/personal-portfolio/
+    owner: www-data
+    group: www-data
+    mode: "0755"
+    remote_src: yes
+  notify: Restart nginx
+  become: yes
+
+- name: Copy Nginx config
+  template:
+    src: portfolio.conf.j2
+    dest: /etc/nginx/sites-available/personal-portfolio
+  notify: Restart nginx
+  become: yes
+
+- name: Enable site config
+  file:
+    src: /etc/nginx/sites-available/personal-portfolio
+    dest: /etc/nginx/sites-enabled/personal-portfolio
+    state: link
+  become: yes
+
+- name: Remove default site
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  become: yes

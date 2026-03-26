@@ -1,0 +1,5 @@
+- name: Deploy web application
+  hosts: tag_Name__web_asg_instance 
+  become: yes
+  roles:
+    - webapp

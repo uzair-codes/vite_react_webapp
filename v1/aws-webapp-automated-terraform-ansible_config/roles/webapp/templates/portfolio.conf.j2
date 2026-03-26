@@ -1,0 +1,21 @@
+server {
+    listen 80;
+    server_name _;
+
+    root /var/www/personal-portfolio;
+    index index.html;
+
+    location / {
+        try_files $uri /index.html;
+    }
+
+    # Serve static assets correctly
+    location ~* \.(?:css|js|jpg|jpeg|gif|png|svg|ico|woff2?|ttf|map)$ {
+        root /var/www/personal-portfolio;
+        access_log off;
+        log_not_found off;
+        expires 30d;
+        add_header Cache-Control "public, must-revalidate";
+    }
+}
+

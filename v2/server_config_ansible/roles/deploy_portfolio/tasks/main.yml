@@ -1,0 +1,20 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for deploy_portfolio
+
+- name: copy file to target servers
+  synchronize:
+    src: "{{ playbook_dir }}/../app/dist/" # playbook_dir = server_config_ansible
+    dest: "/var/www/portfolio"
+    delete: yes # Delete extra files in target dir
+    # Set Permissions
+    # rsync_opts: 
+    #   - "--chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r"
+
+- name: Fix ownership and permissions
+  file:
+    path: /var/www/portfolio/
+    owner: ubuntu
+    group: ubuntu
+    mode: '0755'
+    recurse: yes
