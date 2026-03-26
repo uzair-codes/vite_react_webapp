@@ -16,7 +16,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                // git branch: 'main', url: ''
+                // git branch: 'main', url: 'https://github.com/uzair-codes/vite_react_webapp.git'
                 checkout scm
             }
         }
