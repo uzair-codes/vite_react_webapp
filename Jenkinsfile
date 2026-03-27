@@ -78,8 +78,14 @@ pipeline {
                         keyFileVariable: 'SSH_KEY'
                         )]) {
                             sh '''
+                            ansible role_Bastion_Host -m ping \
+                            --private-key $SSH_KEY
+
+                            ansible role_Webservers -m ping \
+                            --private-key $SSH_KEY
+
                             ansible-playbook deploy.yml \
-                            --private-key $SSH_KEY \
+                            --private-key $SSH_KEY
                             '''
                         }
                 }

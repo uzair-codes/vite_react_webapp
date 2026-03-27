@@ -9,7 +9,6 @@
   apt:
     name: 
       - nginx
-      - rsync
     state: present
     update_cache: yes
 
