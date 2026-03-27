@@ -79,7 +79,8 @@ pipeline {
                         )]) {
                             sh '''
                             ansible-playbook deploy.yml \
-                            --private-key $SSH_KEY
+                            --private-key $SSH_KEY \
+                            -e "ansible_ssh_private_key_file=$SSH_KEY"
                             '''
                         }
                 }
