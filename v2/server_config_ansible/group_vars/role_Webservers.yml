@@ -5,7 +5,7 @@ bastion_host: "{{ groups['role_Bastion_Host'][0] }}"
 bastion_ip: "{{ hostvars[bastion_host]['ansible_host'] }}"
 
 ansible_ssh_common_args: >
-  -o ProxyCommand="ssh -i ~/devops/id_rsa -W %h:%p ubuntu@{{ bastion_ip }}"
+  -o ProxyCommand="ssh -W %h:%p -i {{ ansible_ssh_private_key_file }} ubuntu@{{ bastion_ip }}"
 
 # Internally Ansible runs a command like
 # ssh [options] ubuntu@target_ip
