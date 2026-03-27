@@ -21,7 +21,8 @@ provider "aws" {
 module "ssh_key_pair" {
   source          = "git::https://github.com/uzair-codes/learn_devops.git//5_Iac_Terraform/modules/ssh_key"
   key_name        = var.key_pair_name
-  public_key_path = "${path.module}/keys/ssh-key.pub"
+  # public_key_path = "${path.module}/keys/ssh-key.pub"
+  public_key_path = "/var/lib/jenkins/.ssh/id_rsa.pub"
 }
 
 module "webserver" {
