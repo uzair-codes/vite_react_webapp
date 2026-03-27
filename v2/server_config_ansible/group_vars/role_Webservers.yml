@@ -4,6 +4,8 @@
 bastion_host: "{{ groups['role_Bastion_Host'][0] }}"
 bastion_ip: "{{ hostvars[bastion_host]['ansible_host'] }}"
 
+
+
 ansible_ssh_common_args: >
   -o ProxyCommand="ssh -W %h:%p -i {{ ansible_ssh_private_key_file }} ubuntu@{{ bastion_ip }}"
 
